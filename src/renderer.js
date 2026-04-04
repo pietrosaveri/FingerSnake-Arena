@@ -2,7 +2,7 @@ import { WIN_W, WIN_H, CELL_SIZE, GRID_W, GRID_H } from './config.js'
 
 // ── Asset loading ─────────────────────────────────────────────────────────────
 
-const ASSETS_DIR = '/Graphics/'
+const ASSETS_DIR = './Graphics/'
 const ASSET_NAMES = [
   'apple',
   'body_bottomleft', 'body_bottomright',
