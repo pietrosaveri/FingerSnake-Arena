@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FingerSnake Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="./assets/index-Bpfm6XTI.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CnALbcUY.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── Name screen ─────────────────────────────────────────────────── -->
+    <div id="screen-name" class="screen">      <img src="./assets/sideFire-D1h7-Mgn.gif" class="side-fire side-fire-left"  alt="" />
+      <img src="./assets/sideFire-D1h7-Mgn.gif" class="side-fire side-fire-right" alt="" />      <h1 class="title">FingerSnake Arena</h1>
+      <p class="tagline">Become the first FingerSnake Expert! Beat Everybody!</p>
+      <p class="subtitle">Point. Slither. Destroy.</p>
+      <div class="card">
+        <label for="name-input" class="label">Your Fighter Name</label>
+        <input
+          id="name-input"
+          type="text"
+          maxlength="20"
+          placeholder="Enter your name…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <p id="name-error" class="error hidden"></p>
+          <button id="btn-save-name" class="btn btn-primary">ENTER THE PIT</button>
+      </div>
+    </div>
+
+    <!-- ── Menu screen ─────────────────────────────────────────────────── -->
+    <div id="screen-menu" class="screen hidden">      <img src="./assets/sideFire-D1h7-Mgn.gif" class="side-fire side-fire-left"  alt="" />
+      <img src="./assets/sideFire-D1h7-Mgn.gif" class="side-fire side-fire-right" alt="" />      <h1 class="title">FingerSnake Arena</h1>
+      <p id="welcome-text" class="subtitle"></p>
+      <div class="btn-group vertical">
+        <button id="btn-play" class="btn btn-primary">ENTER ARENA</button>
+        <button id="btn-tutorial" class="btn btn-secondary">TRAINING GROUND</button>
+        <button id="btn-leaderboard-menu" class="btn btn-secondary">HALL OF LEGENDS</button>
+      </div>
+      <p id="tracker-status" class="tracker-status">Loading hand tracker…</p>
+    </div>
+
+    <!-- ── Game screen ─────────────────────────────────────────────────── -->
+    <div id="screen-game" class="screen hidden">
+      <img src="./assets/FireHand-D3co2VkN.gif" class="fire-hand fire-hand-left"  alt="" />
+      <img src="./assets/FireHand-D3co2VkN.gif" class="fire-hand fire-hand-right" alt="" />
+      <div id="game-layout">
+
+        <!-- Left: Live leaderboard panel -->
+        <aside id="game-lb-panel">
+          <div class="panel-title">CHAMPIONS</div>
+          <ol id="game-lb-list">
+            <li class="glb-placeholder">Loading…</li>
+          </ol>
+        </aside>
+
+        <!-- Centre: Game canvas + game-over overlay -->
+        <div id="game-container">
+          <canvas id="game-canvas" width="704" height="528"></canvas>
+          <div id="overlay-gameover" class="overlay hidden">
+            <h2 class="over-title">ELIMINATED</h2>
+            <p id="final-score-text" class="over-score">Score: 0</p>
+            <p id="submit-status" class="submit-status"></p>
+            <div class="btn-group vertical">
+              <button id="btn-play-again" class="btn btn-primary">RISE AGAIN</button>
+              <button id="btn-menu-from-over" class="btn btn-ghost">RETREAT</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Camera panel -->
+        <aside id="game-cam-panel">
+          <div class="panel-title">FIGHTER CAM</div>
+          <canvas id="cam-pip" width="264" height="198"></canvas>
+          <div id="cam-state-badge" class="cam-badge">no hand</div>
+          <canvas id="game-dir-arrow" width="80" height="80"></canvas>
+          <img id="mascot-gif" src="./assets/mascot-u3c-1hCd.gif" alt="mascot" />
+        </aside>
+
+      </div>
+      <button id="btn-mute" class="btn-mute">🔊 MUTE</button>
+    </div>
+
+    <!-- ── Leaderboard screen ──────────────────────────────────────────── -->
+    <div id="screen-leaderboard" class="screen hidden">
+      <h2 class="title">HALL OF LEGENDS</h2>
+      <div id="lb-container">
+        <p id="lb-loading" class="muted">Loading combatants…</p>
+        <p id="lb-error" class="error hidden"></p>
+        <table id="lb-table" class="hidden">
+          <thead>
+            <tr>
+              <th>RANK</th>
+              <th>FIGHTER</th>
+              <th>SCORE</th>
+              <th>DATE</th>
+            </tr>
+          </thead>
+          <tbody id="lb-body"></tbody>
+        </table>
+      </div>
+      <button id="btn-back-lb" class="btn btn-secondary">BACK TO ARENA</button>
+    </div>
+
+    <!-- ── Tutorial screen ────────────────────────────────────────────── -->
+    <div id="screen-tutorial" class="screen hidden">
+      <h1 class="title">TRAINING GROUND</h1>
+      <p class="subtitle">Master the controls — survive all 4 challenges</p>
+
+      <!-- Step cards -->
+      <div id="tut-steps">
+        <div class="tut-step-card" id="tut-card-0">
+          <span class="tut-step-num">1</span>
+          <div class="tut-step-img"></div>
+          <span class="tut-step-dir">UP</span>
+          <span class="tut-step-icon" id="tut-icon-0">○</span>
+        </div>
+        <div class="tut-step-card" id="tut-card-1">
+          <span class="tut-step-num">2</span>
+          <div class="tut-step-img"></div>
+          <span class="tut-step-dir">RIGHT</span>
+          <span class="tut-step-icon" id="tut-icon-1">○</span>
+        </div>
+        <div class="tut-step-card" id="tut-card-2">
+          <span class="tut-step-num">3</span>
+          <div class="tut-step-img"></div>
+          <span class="tut-step-dir">DOWN</span>
+          <span class="tut-step-icon" id="tut-icon-2">○</span>
+        </div>
+        <div class="tut-step-card" id="tut-card-3">
+          <span class="tut-step-num">4</span>
+          <div class="tut-step-img"></div>
+          <span class="tut-step-dir">LEFT</span>
+          <span class="tut-step-icon" id="tut-icon-3">○</span>
+        </div>
+      </div>
+
+      <!-- Bottom row: camera + info panel -->
+      <div id="tut-bottom">
+        <canvas id="tut-cam" width="320" height="240"></canvas>
+        <div id="tut-info">
+          <canvas id="tut-arrow" width="120" height="120"></canvas>
+          <p id="tut-dir-label" class="tut-label-muted">No hand detected</p>
+          <p id="tut-step-label" class="tut-step-instruction">Challenge 1 of 4 — Point your finger <strong>UP</strong></p>
+          <div id="tut-prog-track"><div id="tut-prog-fill"></div></div>
+          <p id="tut-prog-label" class="tut-label-muted">Hold for 3 seconds…</p>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div id="tut-btn-row">
+        <button id="btn-tut-exit" class="btn btn-ghost" style="width:130px">BAIL OUT</button>
+        <button id="btn-tut-continue" class="btn btn-primary" style="width:230px" disabled>ENTER THE ARENA →</button>
+      </div>
+    </div>
+
+    <!-- Tutorial exit confirmation modal -->
+    <div id="tut-exit-modal" class="modal-overlay hidden">
+      <div class="modal-box">
+        <p class="modal-title">COWARD?</p>
+        <p class="modal-body">The arena doesn't forgive weakness!</p>
+        <div class="btn-group vertical" style="margin-top:1.2rem">
+          <button id="btn-tut-exit-confirm" class="btn btn-secondary">Bail out</button>
+          <button id="btn-tut-exit-cancel" class="btn btn-primary">FIGHT ON!</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Background music -->
+  <audio id="bg-music" src="/CrazyMusic/WhatIsHappeing.mp3" loop preload="auto"></audio>
+
+  <!-- Hidden video element used as webcam source for MediaPipe -->
+  <video id="cam-video" autoplay muted playsinline style="display:none"></video>
+
+
+</body>
+</html>
