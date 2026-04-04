@@ -251,15 +251,15 @@ class HandTracker:
         for i, pt in enumerate(lms):
             x, y = int(pt.x * w), int(pt.y * h)
             if i in _TIP_IDS:
-                col, size = (0, 255, 90), 11
+                col, size = (0, 255, 90), 6
             elif i in _OTHER_TIPS:
-                col, size = (70, 110, 200), 8
+                col, size = (70, 110, 200), 4
             elif i == _WRIST:
-                col, size = (200, 60, 60), 9
+                col, size = (200, 60, 60), 5
             elif i in _ACTIVE_IDS:
-                col, size = (0, 200, 100), 5
+                col, size = (0, 200, 100), 3
             else:
-                col, size = (60, 140, 255), 5
+                col, size = (60, 140, 255), 3
             cv2.circle(frame, (x, y), size, col,          -1, cv2.LINE_AA)
             cv2.circle(frame, (x, y), size, (255,255,255), 1,  cv2.LINE_AA)
 

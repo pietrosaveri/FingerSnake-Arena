@@ -4,7 +4,7 @@ GRID_W     = 32
 GRID_H     = 24
 WIN_W      = CELL_SIZE * GRID_W   # 640
 WIN_H      = CELL_SIZE * GRID_H   # 480
-MOVE_DELAY = 130                  # ms between snake steps
+MOVE_DELAY = 180                  # ms between snake steps
 
 # ── Colours ───────────────────────────────────────────────────────────────────
 BLACK      = (  0,   0,   0)
