@@ -232,10 +232,10 @@ export class HandTracker {
     // Joints
     landmarks.forEach((pt, i) => {
       const x = pt.x * width, y = pt.y * height
-      let color = '#3c8cff', size = 5
-      if (TIP_IDS.has(i))        { color = '#00ff5a'; size = 8 }
-      else if (i === _WRIST)     { color = '#c83c3c'; size = 7 }
-      else if (ACTIVE_IDS.has(i)){ color = '#00c864'; size = 5 }
+      let color = '#3c8cff', size = 3
+      if (TIP_IDS.has(i))        { color = '#00ff5a'; size = 5 }
+      else if (i === _WRIST)     { color = '#c83c3c'; size = 4 }
+      else if (ACTIVE_IDS.has(i)){ color = '#00c864'; size = 3 }
 
       ctx.beginPath()
       ctx.arc(x, y, size, 0, Math.PI * 2)

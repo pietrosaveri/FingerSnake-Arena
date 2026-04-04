@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FingerSnake Arena</title>
+  <link rel="icon" type="image/png" href="/Graphics/apple.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -168,6 +169,16 @@
           <button id="btn-tut-exit-cancel" class="btn btn-primary">FIGHT ON!</button>
         </div>
       </div>
+    </div>
+
+    <!-- ── Countdown overlay ──────────────────────────────────────────── -->
+    <div id="countdown-overlay" class="hidden">
+      <div id="countdown-bg"></div>
+      <img src="/Effects/fire2.gif" id="countdown-fire-l" class="cd-fire" alt="" />
+      <img src="/Effects/fire2.gif" id="countdown-fire-r" class="cd-fire cd-fire-flip" alt="" />
+      <canvas id="countdown-canvas"></canvas>
+      <div id="countdown-number"></div>
+      <div id="countdown-flash"></div>
     </div>
 
   </div>

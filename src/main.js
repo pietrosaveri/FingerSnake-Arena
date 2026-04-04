@@ -48,6 +48,9 @@ function shakeEl(el, ms = 380) {
   })
 }
 
+// ── Tiny promise sleep ────────────────────────────────────────────────────────
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
 // ── Score popup & sparks ─────────────────────────────────────────────────────
 function spawnScorePopup(gridX, gridY, text) {
   const container = $('game-container')
@@ -497,6 +500,210 @@ function showTutorial() {
   initCamera()
 }
 
+// ── Countdown sound ───────────────────────────────────────────────────────────
+function sfxCountdownHit(isGo = false) {
+  try {
+    const ctx = getAudioCtx()
+    const now = ctx.currentTime
+
+    // Sub-bass impact kick
+    const o1 = ctx.createOscillator(), g1 = ctx.createGain()
+    o1.connect(g1); g1.connect(ctx.destination)
+    o1.type = 'sine'
+    o1.frequency.setValueAtTime(isGo ? 110 : 82, now)
+    o1.frequency.exponentialRampToValueAtTime(18, now + 0.55)
+    g1.gain.setValueAtTime(isGo ? 0.72 : 0.52, now)
+    g1.gain.exponentialRampToValueAtTime(0.001, now + 0.55)
+    o1.start(now); o1.stop(now + 0.55)
+
+    // Mid body crunch
+    const o2 = ctx.createOscillator(), g2 = ctx.createGain()
+    o2.connect(g2); g2.connect(ctx.destination)
+    o2.type = 'sawtooth'
+    o2.frequency.setValueAtTime(isGo ? 230 : 165, now)
+    o2.frequency.exponentialRampToValueAtTime(28, now + 0.38)
+    g2.gain.setValueAtTime(0.38, now)
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.38)
+    o2.start(now); o2.stop(now + 0.38)
+
+    if (isGo) {
+      // High crack
+      const o3 = ctx.createOscillator(), g3 = ctx.createGain()
+      o3.connect(g3); g3.connect(ctx.destination)
+      o3.type = 'square'
+      o3.frequency.setValueAtTime(940, now)
+      o3.frequency.exponentialRampToValueAtTime(55, now + 0.28)
+      g3.gain.setValueAtTime(0.22, now)
+      g3.gain.exponentialRampToValueAtTime(0.001, now + 0.28)
+      o3.start(now); o3.stop(now + 0.28)
+
+      // Rising arena siren
+      const o4 = ctx.createOscillator(), g4 = ctx.createGain()
+      o4.connect(g4); g4.connect(ctx.destination)
+      o4.type = 'sawtooth'
+      o4.frequency.setValueAtTime(290, now)
+      o4.frequency.exponentialRampToValueAtTime(1500, now + 0.48)
+      g4.gain.setValueAtTime(0.18, now)
+      g4.gain.exponentialRampToValueAtTime(0.001, now + 0.48)
+      o4.start(now); o4.stop(now + 0.48)
+    }
+  } catch {}
+}
+
+// ── Countdown particle system ─────────────────────────────────────────────────
+let _cdParticles  = []
+let _cdPRafId     = null
+
+function _cdLaunchParticles(canvas, isGo) {
+  const cx = canvas.width  / 2
+  const cy = canvas.height / 2
+  const count = isGo ? 110 : 60
+  const palette = ['#ff0000', '#ff3300', '#ff4500', '#ff6b00', '#ff9900', '#ffcc00', '#ffffff']
+
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2
+    const speed = isGo
+      ? (110 + Math.random() * 300)
+      : (65  + Math.random() * 195)
+    const sz    = isGo ? (3 + Math.random() * 9) : (2 + Math.random() * 6)
+    const life  = 0.65 + Math.random() * 0.85
+    _cdParticles.push({
+      x:       cx + (Math.random() - 0.5) * 90,
+      y:       cy + (Math.random() - 0.5) * 90,
+      vx:      Math.cos(angle) * speed,
+      vy:      Math.sin(angle) * speed - (isGo ? 90 : 50),   // bias upward
+      life,
+      maxLife: life,
+      size:    sz,
+      color:   palette[Math.floor(Math.random() * palette.length)],
+      grav:    isGo ? 210 : 148,
+    })
+  }
+}
+
+function _cdStartParticleLoop(ctx, canvas) {
+  let last = null
+  function tick(ts) {
+    if (!last) last = ts
+    const dt = Math.min((ts - last) / 1000, 0.05)
+    last = ts
+
+    // Clear canvas each frame so game board shows through
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    for (let i = _cdParticles.length - 1; i >= 0; i--) {
+      const p = _cdParticles[i]
+      p.life -= dt
+      if (p.life <= 0) { _cdParticles.splice(i, 1); continue }
+      p.x  += p.vx * dt
+      p.y  += p.vy * dt
+      p.vy += p.grav * dt
+      p.vx *= 0.965
+      const alpha = Math.pow(p.life / p.maxLife, 1.4)
+      ctx.save()
+      ctx.globalAlpha  = alpha
+      ctx.shadowColor  = p.color
+      ctx.shadowBlur   = p.size * 4.5
+      ctx.fillStyle    = p.color
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+
+    if (_cdParticles.length > 0) {
+      _cdPRafId = requestAnimationFrame(tick)
+    } else {
+      _cdPRafId = null
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+  }
+  if (_cdPRafId) cancelAnimationFrame(_cdPRafId)
+  _cdPRafId = requestAnimationFrame(tick)
+}
+
+// ── Main countdown ────────────────────────────────────────────────────────────
+async function runCountdown() {
+  const overlay = $('countdown-overlay')
+  const numEl   = $('countdown-number')
+  const flashEl = $('countdown-flash')
+  const canvas  = $('countdown-canvas')
+  const ctx     = canvas.getContext('2d')
+
+  canvas.width  = window.innerWidth
+  canvas.height = window.innerHeight
+  _cdParticles  = []
+
+  // Draw the initial game frame so the board + snake are visible through the transparent overlay
+  drawGame(gameCtx, snake, food, score, tracker.handState)
+
+  overlay.classList.remove('hidden')
+  // Ensure music is playing from the first beat of the countdown
+  bgMusic.play().catch(() => {})
+
+  // Per-step config: text, text colour, glow colour, flash colour
+  const steps = [
+    { label: '3',  color: '#ff3322', glow: '#cc0000', flash: '#ffffff' },
+    { label: '2',  color: '#ff6633', glow: '#ff3300', flash: '#ffffff' },
+    { label: '1',  color: '#ffaa44', glow: '#ff7700', flash: '#ffcc88' },
+    { label: 'GO', color: '#ffee55', glow: '#ffcc00', flash: '#ffee44' },
+  ]
+
+  for (let i = 0; i < steps.length; i++) {
+    const { label, color, glow, flash } = steps[i]
+    const isGo = label === 'GO'
+
+    // Style number
+    numEl.textContent  = label
+    numEl.style.color  = color
+    numEl.style.filter = `drop-shadow(0 0 28px ${glow}) drop-shadow(0 0 60px ${glow}80)`
+
+    // Trigger slam animation (force reflow first to restart if needed)
+    numEl.classList.remove('cd-slam-in', 'cd-explode-out', 'cd-go-slam', 'cd-go-explode')
+    void numEl.offsetWidth
+    numEl.classList.add(isGo ? 'cd-go-slam' : 'cd-slam-in')
+
+    // Audio boom
+    sfxCountdownHit(isGo)
+
+    // Screen shake — shake both the overlay content and the arena behind it
+    shakeEl(overlay,   isGo ? 750 : 420)
+    shakeEl($('app'),  isGo ? 750 : 420)
+
+    // White/gold flash
+    flashEl.style.background = flash
+    flashEl.classList.remove('cd-flash-anim')
+    void flashEl.offsetWidth
+    flashEl.classList.add('cd-flash-anim')
+
+    // Particle burst
+    _cdLaunchParticles(canvas, isGo)
+    _cdStartParticleLoop(ctx, canvas)
+
+    // Hold number visible (slam animation + settle time)
+    await sleep(isGo ? 820 : 680)
+
+    // Explode out
+    numEl.classList.remove('cd-slam-in', 'cd-go-slam')
+    void numEl.offsetWidth
+    numEl.classList.add(isGo ? 'cd-go-explode' : 'cd-explode-out')
+
+    await sleep(isGo ? 360 : 210)
+
+    // Clear for next step
+    numEl.classList.remove('cd-explode-out', 'cd-go-explode')
+    numEl.textContent = ''
+
+    if (!isGo) await sleep(75)
+  }
+
+  // Tear down
+  if (_cdPRafId) { cancelAnimationFrame(_cdPRafId); _cdPRafId = null }
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  _cdParticles = []
+  overlay.classList.add('hidden')
+}
+
 // ── Leaderboard helpers ───────────────────────────────────────────────────────
 async function showLeaderboard() {
   showScreen('leaderboard')
@@ -592,11 +799,13 @@ async function saveName() {
 }
 
 // Menu screen
-$('btn-play').addEventListener('click', async () => { sfxClick()
+$('btn-play').addEventListener('click', async () => {
+  sfxClick()
   showScreen('game')
   await initCamera()
   startMusic()
   resetGame()           // also calls refreshGameLeaderboard()
+  await runCountdown()
   startGameLoop()
 })
 
@@ -629,12 +838,14 @@ $('btn-tut-continue').addEventListener('click', async () => {
   await initCamera()
   startMusic()
   resetGame()
+  await runCountdown()
   startGameLoop()
 })
 
 // Game-over overlay
-$('btn-play-again').addEventListener('click', () => {
+$('btn-play-again').addEventListener('click', async () => {
   resetGame()
+  await runCountdown()
   startGameLoop()
 })
 
@@ -673,7 +884,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'r' || e.key === 'R') {
     if (currentScreen === 'game' && gameState === 'over') {
       resetGame()
-      startGameLoop()
+      runCountdown().then(startGameLoop)
     }
   }
   if (e.key === 'Escape') {

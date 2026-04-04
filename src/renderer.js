@@ -90,6 +90,19 @@ function getBodySpriteName(body, i) {
   return 'body_horizontal'
 }
 
+function getHeadSpriteName(body) {
+  if (body.length < 2) return 'head_right'
+  const [hx, hy] = body[0]
+  const [bx, by] = body[1]
+  const dx = bx - hx   // body[1] - body[0], same logic as original Python
+  const dy = by - hy
+  if (dx ===  1) return 'head_left'
+  if (dx === -1) return 'head_right'
+  if (dy ===  1) return 'head_up'
+  if (dy === -1) return 'head_down'
+  return 'head_right'
+}
+
 function getTailSpriteName(body) {
   const n = body.length
   const [tx, ty] = body[n - 1]
@@ -129,7 +142,7 @@ export function drawGame(ctx, snake, food, score, handState) {
       drawSprite(ctx, getBodySpriteName(body, i), body[i][0], body[i][1])
     }
   }
-  drawSprite(ctx, `head_${snake.direction.toLowerCase()}`, body[0][0], body[0][1])
+  drawSprite(ctx, getHeadSpriteName(body), body[0][0], body[0][1])
 
   // Score pill (top-left)
   const scoreText = `Score: ${score}`
