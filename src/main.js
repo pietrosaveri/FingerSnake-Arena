@@ -408,7 +408,7 @@ function drawDirectionArrow(ctx, w, h, direction) {
 
 function updateTutProgress(frac) {
   $('tut-prog-fill').style.width      = (frac * 100) + '%'
-  $('tut-prog-fill').style.background = frac > 0 ? 'var(--green)' : 'var(--fire-1)'
+  $('tut-prog-fill').style.background = frac > 0 ? '#22c55e' : 'var(--fire-1)'
 }
 
 function updateTutInstruction() {
