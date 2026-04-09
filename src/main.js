@@ -262,7 +262,7 @@ function resetGame() {
 
 async function handleGameOver() {
   gameState = 'over'
-  drawGameOverLayer(gameCtx, score)
+  drawGameOverLayer(gameCtx, snake)
   $('final-score-text').textContent = `Score: ${score}`
   showOverlay('overlay-gameover')
 
@@ -865,22 +865,7 @@ $('btn-mute').addEventListener('click', () => {
   $('btn-mute').classList.toggle('muted', musicMuted)
 })
 
-// ── Keyboard controls ─────────────────────────────────────────────────────────
-const KEY_TO_DIR = {
-  ArrowUp:    'UP',
-  ArrowDown:  'DOWN',
-  ArrowLeft:  'LEFT',
-  ArrowRight: 'RIGHT',
-}
-
 document.addEventListener('keydown', e => {
-  if (currentScreen === 'game' && gameState === 'playing') {
-    const dir = KEY_TO_DIR[e.key]
-    if (dir) {
-      e.preventDefault()
-      snake.setDirection(dir)
-    }
-  }
   if (e.key === 'r' || e.key === 'R') {
     if (currentScreen === 'game' && gameState === 'over') {
       resetGame()

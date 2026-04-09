@@ -478,13 +478,12 @@ input[type="text"]:focus {
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.86);
+  background: transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.9rem;
-  backdrop-filter: blur(3px);
 }
 
 .overlay.hidden { display: none; }

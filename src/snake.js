@@ -6,13 +6,17 @@ export class Snake {
   reset() {
     const sx = Math.floor(GRID_W / 2)
     const sy = Math.floor(GRID_H / 2)
-    this.body      = [[sx, sy], [sx - 1, sy], [sx - 2, sy]]
-    this.direction = 'RIGHT'
-    this._grow     = false
+    this.body        = [[sx, sy], [sx - 1, sy], [sx - 2, sy]]
+    this.direction   = 'RIGHT'
+    this._lastMoved  = 'RIGHT'
+    this._grow       = false
   }
 
   setDirection(newDir) {
-    if (newDir !== OPPOSITE[this.direction]) {
+    // Guard against reversals using the direction the snake *actually* moved last
+    // tick, not the queued direction. This prevents rapid webcam updates within a
+    // single tick from queuing a direction that doubles back into the body.
+    if (newDir !== OPPOSITE[this._lastMoved]) {
       this.direction = newDir
     }
   }
@@ -22,7 +26,8 @@ export class Snake {
     const { dx, dy }  = DIRECTIONS[this.direction]
     this.body.unshift([hx + dx, hy + dy])
     if (!this._grow) this.body.pop()
-    this._grow = false
+    this._grow      = false
+    this._lastMoved = this.direction
   }
 
   eat(food) {

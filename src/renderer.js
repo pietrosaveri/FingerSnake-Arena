@@ -178,9 +178,57 @@ export function drawGame(ctx, snake, food, score, handState) {
   ctx.textBaseline = 'alphabetic'
 }
 
-// ── Game-over canvas dim ──────────────────────────────────────────────────────
+// ── Game-over canvas overlay ──────────────────────────────────────────────────
 
-export function drawGameOverLayer(ctx, _score) {
-  ctx.fillStyle = 'rgba(0,0,0,0.55)'
+export function drawGameOverLayer(ctx, snake) {
+  const [hx, hy] = snake.body[0]
+  const wallDeath = hx < 0 || hx >= GRID_W || hy < 0 || hy >= GRID_H
+
+  // Subtle dark tint to frame the death scene
+  ctx.fillStyle = 'rgba(0,0,0,0.32)'
   ctx.fillRect(0, 0, WIN_W, WIN_H)
+
+  // Clamp to grid for drawing (head may be 1 cell outside on wall death)
+  const gx = Math.max(0, Math.min(GRID_W - 1, hx))
+  const gy = Math.max(0, Math.min(GRID_H - 1, hy))
+  const cx = gx * CELL_SIZE + CELL_SIZE / 2
+  const cy = gy * CELL_SIZE + CELL_SIZE / 2
+
+  // Red radial glow around the death cell
+  const grd = ctx.createRadialGradient(cx, cy, 2, cx, cy, CELL_SIZE * 2)
+  grd.addColorStop(0, 'rgba(255,0,0,0.75)')
+  grd.addColorStop(1, 'rgba(255,0,0,0)')
+  ctx.fillStyle = grd
+  ctx.fillRect(
+    (gx - 1) * CELL_SIZE, (gy - 1) * CELL_SIZE,
+    CELL_SIZE * 3,        CELL_SIZE * 3
+  )
+
+  // Red X on the death cell
+  ctx.strokeStyle = 'rgba(255,40,40,0.95)'
+  ctx.lineWidth   = 3
+  ctx.lineCap     = 'round'
+  ctx.beginPath()
+  ctx.moveTo(gx * CELL_SIZE + 6,             gy * CELL_SIZE + 6)
+  ctx.lineTo(gx * CELL_SIZE + CELL_SIZE - 6, gy * CELL_SIZE + CELL_SIZE - 6)
+  ctx.moveTo(gx * CELL_SIZE + CELL_SIZE - 6, gy * CELL_SIZE + 6)
+  ctx.lineTo(gx * CELL_SIZE + 6,             gy * CELL_SIZE + CELL_SIZE - 6)
+  ctx.stroke()
+
+  // For self-collision: also highlight the body segment that was hit
+  if (!wallDeath) {
+    const hit = snake.body.slice(1).find(([x, y]) => x === hx && y === hy)
+    if (hit) {
+      const bx = hit[0] * CELL_SIZE + CELL_SIZE / 2
+      const by = hit[1] * CELL_SIZE + CELL_SIZE / 2
+      const grd2 = ctx.createRadialGradient(bx, by, 2, bx, by, CELL_SIZE * 1.4)
+      grd2.addColorStop(0, 'rgba(255,200,0,0.65)')
+      grd2.addColorStop(1, 'rgba(255,200,0,0)')
+      ctx.fillStyle = grd2
+      ctx.fillRect(
+        hit[0] * CELL_SIZE - CELL_SIZE / 2, hit[1] * CELL_SIZE - CELL_SIZE / 2,
+        CELL_SIZE * 2,                       CELL_SIZE * 2
+      )
+    }
+  }
 }
